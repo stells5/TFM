@@ -1,0 +1,9 @@
+venv/
+.env
+db/*.db
+logs/*.log
+__pycache__/
+*.pyc
+.vscode/
+.ipynb_checkpoints/
+~$*
