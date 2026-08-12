@@ -26,24 +26,38 @@ def _session() -> requests.Session:
     s.mount("https://", _LegacyTLSAdapter())
     return s
 
-# Códigos de provincia (INE) que atraviesan las 6 rutas del proyecto
-# (ver ORIGENES_DESTINOS en load/rutas.py). Añade aquí el código de
-# cualquier provincia nueva que necesites cubrir.
+# Códigos de provincia (INE) que atraviesan las rutas del proyecto (ver
+# PROVINCIAS_POR_VARIANTE en load/rutas.py, o consulta "SELECT DISTINCT
+# provincia FROM ruta_provincias" para la lista siempre actualizada). Añade
+# aquí el código de cualquier provincia nueva que necesites cubrir.
 PROVINCIAS = {
-    "50": "Zaragoza",
-    "28": "Madrid",
+    "01": "Álava",
+    "06": "Badajoz",
     "08": "Barcelona",
-    "48": "Bizkaia",
-    "22": "Huesca",
-    "25": "Lleida",
-    "19": "Guadalajara",
-    "16": "Cuenca",
-    "46": "Valencia",
-    "12": "Castellón",
-    "43": "Tarragona",
     "09": "Burgos",
-    "31": "Navarra",
+    "10": "Cáceres",
+    "12": "Castellón",
+    "13": "Ciudad Real",
+    "14": "Córdoba",
+    "15": "A Coruña",
+    "16": "Cuenca",
+    "19": "Guadalajara",
+    "22": "Huesca",
+    "23": "Jaén",
+    "24": "León",
+    "25": "Lleida",
     "26": "La Rioja",
+    "27": "Lugo",
+    "28": "Madrid",
+    "31": "Navarra",
+    "34": "Palencia",
+    "41": "Sevilla",
+    "42": "Soria",
+    "43": "Tarragona",
+    "45": "Toledo",
+    "46": "Valencia",
+    "48": "Bizkaia",
+    "50": "Zaragoza",
 }
 
 
