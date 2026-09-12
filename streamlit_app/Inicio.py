@@ -83,8 +83,8 @@ st.subheader(f"Todas las variantes desde {origen_sel}")
 
 tabla = vista[
     [
-        "variante", "distancia_km", "duracion_min", "score_riesgo", "score_coste",
-        "incidencia_mas_grave_tipo", "viento_max", "lluvia_max",
+        "variante", "distancia_km", "duracion_min", "score_coste",
+        "incidencia_mas_grave_tipo", "viento_max", "lluvia_max", "score_riesgo",
     ]
 ].sort_values("score_riesgo")
 
