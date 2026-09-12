@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS ruta_provincias (
 
 -- ---------- Tablas de hechos (alimentadas por ETL periódica) ----------
 
--- Guardamos la vía (ej. "A-2") tal cual la da la DGT, en vez de un tramo_id
+-- Guardo la vía (ej. "A-2") tal cual la da la DGT, en vez de un tramo_id
 -- fijo: una misma vía puede pertenecer a varias rutas/variantes, así que el
 -- cruce incidencia <-> ruta se hace por texto en el cálculo del índice
 -- (mismo criterio que en precios_combustible.direccion).
@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS incidencias_trafico (
     tipo_incidencia TEXT,
     severidad TEXT,
     km REAL,
+    lat REAL,
+    lon REAL,
     timestamp_inicio TEXT,
     timestamp_captura TEXT NOT NULL,
     fuente TEXT NOT NULL DEFAULT 'DGT'

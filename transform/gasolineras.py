@@ -37,7 +37,7 @@ def transformar_precios(estaciones: list) -> pd.DataFrame:
                 {
                     "provincia": estacion.get("Provincia"),
                     "municipio": estacion.get("Municipio"),
-                    # Guardamos la dirección tal cual la da la API (ej. "CARRETERA N-122
+                    # Guardo la dirección tal cual la da la API (ej. "CARRETERA N-122
                     # KM. 53,5") para poder casar más adelante gasolinera <-> tramo de
                     # carretera de una ruta, buscando el nombre de la vía en el texto.
                     "direccion": estacion.get("Dirección"),

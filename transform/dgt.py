@@ -18,6 +18,8 @@ def transformar_incidencias(incidencias: list) -> pd.DataFrame:
             "tipo_incidencia": inc["cause_type"],
             "severidad": inc["severity"],
             "km": float(inc["km"]) if inc["km"] is not None else None,
+            "lat": inc["lat"],
+            "lon": inc["lon"],
             "timestamp_inicio": inc["start_time"],
             "timestamp_captura": timestamp_captura,
         }

@@ -11,7 +11,7 @@ BASE_URL = (
 
 class _LegacyTLSAdapter(HTTPAdapter):
     """El servidor del Ministerio usa una configuración TLS obsoleta que el
-    OpenSSL moderno rechaza por defecto ("SSLEOFError"). Bajamos el nivel de
+    OpenSSL moderno rechaza por defecto ("SSLEOFError"). Bajo el nivel de
     seguridad de los cifrados sólo para este host."""
 
     def init_poolmanager(self, *args, **kwargs):

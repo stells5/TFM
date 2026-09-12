@@ -52,7 +52,7 @@ ORIGENES_DESTINOS = [
 ]
 
 # Provincias que cruza cada variante, definidas a mano (geografía real +
-# contraste con las provincias que ya vimos en incidencias_trafico para
+# contraste con las provincias que ya vi en incidencias_trafico para
 # esas mismas vías). Clave = el texto exacto de rutas.variante.
 PROVINCIAS_POR_VARIANTE = {
     "N-330, Z-40, A-2, AP-2, AP-7, B-23": [
@@ -141,8 +141,8 @@ def run() -> None:
                 ).fetchone()
                 if ya_existe:
                     # Rutas creadas antes de añadir duracion_min al esquema
-                    # se quedaron sin ese dato: lo rellenamos ahora que ya
-                    # tenemos la respuesta fresca de OSRM.
+                    # se quedaron sin ese dato: lo relleno ahora que ya
+                    # tengo la respuesta fresca de OSRM.
                     ruta_id_existente, duracion_existente = ya_existe
                     if duracion_existente is None:
                         conn.execute(

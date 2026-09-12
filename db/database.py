@@ -26,6 +26,8 @@ COLUMNAS_NUEVAS_POR_TABLA = {
     },
     "incidencias_trafico": {
         "km": "REAL",
+        "lat": "REAL",
+        "lon": "REAL",
     },
     "indice_riesgo_ruta": {
         "viento_max": "REAL",

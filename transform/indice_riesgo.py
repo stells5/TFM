@@ -8,7 +8,7 @@ import sqlite3
 
 # Peso base de cada incidencia según su tipo (la DGT casi nunca informa la
 # severidad -ver PESO_SEVERIDAD abajo-, así que el tipo es la señal que más
-# fiablemente tenemos: un accidente pesa más que unas obras rutinarias).
+# fiablemente tengo: un accidente pesa más que unas obras rutinarias).
 PESO_CAUSA = {
     "accident": 3,
     "infrastructureDamageObstruction": 3,
@@ -162,7 +162,7 @@ def calcular_riesgo_meteo(conn: sqlite3.Connection, provincias: list) -> float:
         """
     ).fetchall()
 
-    # Nos quedamos solo con la lectura más reciente de cada estación.
+    # Me quedo solo con la lectura más reciente de cada estación.
     vistas = set()
     riesgo = 0.0
     for zona, precipitacion, viento, _ts in filas:

@@ -22,7 +22,22 @@ def _texto(elem, xpath: str):
     return hijo.text if hijo is not None else None
 
 
+def _coordenadas(record):
+    """Lat/lon del primer punto localizado en locationReference. Tanto las
+    incidencias puntuales (tpegPointLocation) como los tramos
+    (tpegLinearLocation, que traen "from" y "to") incluyen pointCoordinates;
+    para un tramo me quedo con el primero que aparece en el XML ("to").
+    Devuelve (None, None) si el registro no trae coordenadas."""
+    punto = record.find(".//loc:pointCoordinates", NS)
+    if punto is None:
+        return None, None
+    lat = _texto(punto, "loc:latitude")
+    lon = _texto(punto, "loc:longitude")
+    return (float(lat) if lat is not None else None, float(lon) if lon is not None else None)
+
+
 def _parsear_record(record) -> dict:
+    lat, lon = _coordenadas(record)
     return {
         "situacion_id": record.get("id"),
         "cause_type": _texto(record, "sit:cause/sit:causeType"),
@@ -31,6 +46,8 @@ def _parsear_record(record) -> dict:
         "province": _texto(record, ".//lse:province"),
         "municipality": _texto(record, ".//lse:municipality"),
         "km": _texto(record, ".//lse:kilometerPoint"),
+        "lat": lat,
+        "lon": lon,
         "start_time": _texto(
             record, "sit:validity/com:validityTimeSpecification/com:overallStartTime"
         ),
