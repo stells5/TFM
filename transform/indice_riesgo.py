@@ -4,6 +4,7 @@ hay en la base de datos (incidencias DGT, meteo AEMET, precios de gasolineras).
 No hay tramo_id/coordenadas exactas: el cruce se hace por texto (nombre de
 vía, nombre de ciudad/provincia), el mismo criterio usado en todo el proyecto.
 """
+import re
 import sqlite3
 
 # Peso base de cada incidencia según su tipo (la DGT casi nunca informa la
@@ -210,28 +211,38 @@ def calcular_meteo_max(conn: sqlite3.Connection, provincias: list):
     return viento_max, viento_max_provincia, lluvia_max, lluvia_max_provincia
 
 
+def via_en_direccion(direccion, vias: list) -> bool:
+    """True si alguna vía de la ruta aparece como código completo en la
+    dirección de la gasolinera. Un LIKE '%A-2%' a secas también engancharía
+    "A-22", "A-220" o "A-2217": exijo que justo después del código no venga
+    otro dígito (para no confundir "A-2" con "A-22") y que justo antes no
+    venga una letra (para no confundir con una vía provincial como "CA-2")."""
+    if not direccion:
+        return False
+    return any(
+        re.search(rf"(?<![A-Za-z0-9]){re.escape(via)}(?![0-9])", direccion)
+        for via in vias
+    )
+
+
 def _gasolineras_de_ruta(
     conn: sqlite3.Connection, vias: list, provincias: list, tipo_combustible: str
 ) -> list:
     """Filas (municipio, direccion, precio) de precios_combustible cuya
-    dirección menciona alguna de las vías dadas y cuya provincia es una de
-    las de la ruta."""
+    dirección menciona alguna de las vías dadas (como código de vía completo,
+    no como substring de otra) y cuya provincia es una de las de la ruta."""
     if not vias:
         return []
-    condiciones = " OR ".join("direccion LIKE ?" for _ in vias)
-    patrones = [f"%{v}%" for v in vias]
     filas = conn.execute(
-        f"""
-        SELECT municipio, direccion, precio, provincia FROM precios_combustible
-        WHERE tipo_combustible = ? AND ({condiciones})
-        """,
-        [tipo_combustible] + patrones,
+        "SELECT municipio, direccion, precio, provincia FROM precios_combustible WHERE tipo_combustible = ?",
+        (tipo_combustible,),
     ).fetchall()
 
     return [
         (municipio, direccion, precio)
         for municipio, direccion, precio, provincia in filas
-        if not provincias or _provincia_coincide(provincia, provincias)
+        if via_en_direccion(direccion, vias)
+        and (not provincias or _provincia_coincide(provincia, provincias))
     ]
 
 

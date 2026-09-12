@@ -5,6 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from utils import (
+    capturas_dgt_por_dia,
     cargar_rutas,
     tendencia_incidencias,
     tendencia_meteo,
@@ -71,9 +72,13 @@ with tab_incidencias:
         st.info("Sin incidencias registradas en las vías de esta ruta.")
     else:
         df["fecha"] = pd.to_datetime(df["timestamp_captura"]).dt.floor("D")
-        activas_por_dia = df.groupby("fecha")["timestamp_captura"].nunique().reset_index(name="capturas")
-        conteo = df.groupby("fecha").size().reset_index(name="incidencias")
-        conteo = conteo.merge(activas_por_dia, on="fecha")
+        incidencias_por_dia = df.groupby("fecha").size().reset_index(name="incidencias")
+        # Parto del total de capturas del pipeline de DGT ese día (no solo
+        # las capturas en las que esta vía tuvo alguna incidencia): si no,
+        # un día sin incidencias en la ruta no contaría ninguna captura y la
+        # media saldría inflada en vez de con un 0 real ese día.
+        conteo = capturas_dgt_por_dia().merge(incidencias_por_dia, on="fecha", how="left")
+        conteo["incidencias"] = conteo["incidencias"].fillna(0)
         conteo["incidencias_por_captura"] = conteo["incidencias"] / conteo["capturas"]
 
         fig_incidencias = px.line(

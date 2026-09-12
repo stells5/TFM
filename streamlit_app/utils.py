@@ -20,6 +20,7 @@ from transform.indice_riesgo import (  # noqa: E402
     PESO_CAUSA,
     PESO_CAUSA_DEFECTO,
     provincias_de_ruta,
+    via_en_direccion,
     vias_de_ruta,
 )
 
@@ -99,19 +100,20 @@ def cargar_incidencias_activas(vias: tuple, provincias: tuple) -> pd.DataFrame:
 
 @st.cache_data(ttl=CACHE_TTL)
 def cargar_gasolineras_ruta(vias: tuple, provincias: tuple, tipo_combustible: str = "gasoleo_a") -> pd.DataFrame:
-    """Gasolineras (última lectura de precio) cuya dirección menciona alguna vía de la ruta."""
+    """Gasolineras (última lectura de precio) cuya dirección menciona alguna vía de la ruta
+    como código completo (ver via_en_direccion: "A-2" no debe colar "A-22")."""
     if not vias:
         return pd.DataFrame()
-    condiciones = " OR ".join("direccion LIKE ?" for _ in vias)
-    patrones = [f"%{v}%" for v in vias]
-    query = f"""
+    query = """
         SELECT provincia, municipio, direccion, precio, timestamp_captura
         FROM precios_combustible
-        WHERE tipo_combustible = ? AND ({condiciones})
+        WHERE tipo_combustible = ?
         AND timestamp_captura = (SELECT MAX(timestamp_captura) FROM precios_combustible)
     """
     with get_connection() as conn:
-        df = pd.read_sql(query, conn, params=[tipo_combustible] + patrones)
+        df = pd.read_sql(query, conn, params=[tipo_combustible])
+    if not df.empty:
+        df = df[df["direccion"].apply(lambda d: via_en_direccion(d, list(vias)))]
     if provincias and not df.empty:
         df = df[df["provincia"].apply(lambda p: coincide(p, list(provincias)))]
     return df.sort_values("precio")
@@ -136,22 +138,39 @@ def tendencia_incidencias(vias: tuple, provincias: tuple) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=CACHE_TTL)
+def capturas_dgt_por_dia() -> pd.DataFrame:
+    """Nº de ejecuciones del pipeline de DGT por día, contando TODAS las
+    capturas (no solo las de una vía concreta). Sirve de denominador para
+    "incidencias activas por captura": si se filtrara por las capturas que
+    aparecen en tendencia_incidencias, un día en el que la ruta no tuvo
+    ninguna incidencia activa no contaría ninguna captura ese día, e
+    infla la media artificialmente."""
+    with get_connection() as conn:
+        df = pd.read_sql("SELECT DISTINCT timestamp_captura FROM incidencias_trafico", conn)
+    if df.empty:
+        return df
+    df["fecha"] = pd.to_datetime(df["timestamp_captura"]).dt.floor("D")
+    return df.groupby("fecha").size().reset_index(name="capturas")
+
+
+@st.cache_data(ttl=CACHE_TTL)
 def tendencia_precios(vias: tuple, provincias: tuple, tipo_combustible: str = "gasoleo_a") -> pd.DataFrame:
-    """Histórico completo de precios de combustible en las gasolineras de la ruta."""
+    """Histórico completo de precios de combustible en las gasolineras de la ruta
+    (vía como código completo, ver via_en_direccion)."""
     if not vias:
         return pd.DataFrame()
-    condiciones = " OR ".join("direccion LIKE ?" for _ in vias)
-    patrones = [f"%{v}%" for v in vias]
-    query = f"""
-        SELECT provincia, precio, timestamp_captura
+    query = """
+        SELECT provincia, direccion, precio, timestamp_captura
         FROM precios_combustible
-        WHERE tipo_combustible = ? AND ({condiciones})
+        WHERE tipo_combustible = ?
     """
     with get_connection() as conn:
-        df = pd.read_sql(query, conn, params=[tipo_combustible] + patrones)
+        df = pd.read_sql(query, conn, params=[tipo_combustible])
+    if not df.empty:
+        df = df[df["direccion"].apply(lambda d: via_en_direccion(d, list(vias)))]
     if provincias and not df.empty:
         df = df[df["provincia"].apply(lambda p: coincide(p, list(provincias)))]
-    return df
+    return df.drop(columns=["direccion"])
 
 
 @st.cache_data(ttl=CACHE_TTL)
