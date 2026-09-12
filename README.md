@@ -31,10 +31,16 @@ pip install -r requirements.txt
 copy .env.example .env         # y rellena tu AEMET_API_KEY (gratuita, ver https://opendata.aemet.es/centrodedescargas/altaUsuario)
 ```
 
+`db/pipeline.db` se incluye tal cual en el repositorio, con datos reales ya descargados — no hace falta ejecutar el pipeline para ver resultados, ni siquiera tener una `AEMET_API_KEY` propia. Solo hace falta si quieres refrescar los datos tú mismo.
+
 ## Uso
 
 ```bash
-# Da de alta las rutas (una sola vez, o al añadir un origen nuevo)
+# Ver los resultados ya calculados (funciona directamente, sin más pasos)
+python ver_indice.py
+streamlit run streamlit_app/Inicio.py
+
+# Para refrescar los datos: da de alta las rutas (una sola vez, o al añadir un origen nuevo)
 python -m load.rutas
 
 # Corre el pipeline completo en bucle (descarga periódica + recálculo del índice)
@@ -45,12 +51,6 @@ python -m load.dgt
 python -m load.aemet
 python -m load.gasolineras
 python -m load.indice_riesgo
-
-# Consulta los resultados por consola (sin descargar nada nuevo)
-python ver_indice.py
-
-# Panel interactivo (ránking, mapa de rutas, tendencias históricas)
-streamlit run streamlit_app/Inicio.py
 ```
 
 La periodicidad de cada fuente se configura en `.env` (`DGT_INTERVAL_MINUTES`, `AEMET_INTERVAL_MINUTES`, `GASOLINERAS_HORA_DIARIA`), ver `.env.example`.
